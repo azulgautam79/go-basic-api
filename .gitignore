@@ -1,0 +1,16 @@
+# SQLite
+*.db
+tasks.db
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Vercel
+.vercel
+
+# Go
+*.exe
+*.test
+*.out

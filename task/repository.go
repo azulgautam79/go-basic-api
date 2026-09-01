@@ -1,0 +1,165 @@
+package task
+
+import "database/sql"
+
+type RepositoryInterface interface {
+	Create(title string) (*Task, error)
+	FindAll() ([]Task, error)
+	FindByID(id int) (*Task, error)
+	Update(id int, title string, completed bool) error
+	Delete(id int) error
+}
+
+type Repository struct {
+	db *sql.DB
+}
+
+var _ RepositoryInterface = (*Repository)(nil)
+
+func NewRepository(db *sql.DB) *Repository {
+	return &Repository{
+		db: db,
+	}
+}
+
+//! Create Task
+func (r *Repository) Create(title string) (*Task, error) {
+	result, err := r.db.Exec(
+		"INSERT INTO tasks(title, completed) VALUES (?, ?)",
+		title,
+		false,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+
+	return &Task{
+		ID:        int(id),
+		Title:     title,
+		Completed: false,
+	}, nil
+}
+
+//! Find All
+func (r *Repository) FindAll() ([]Task, error) {
+	rows, err := r.db.Query(`
+	SELECT id, title, completed
+	FROM tasks
+	`)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var tasks []Task
+
+	for rows.Next() {
+		var task Task
+
+		err := rows.Scan(
+			&task.ID,
+			&task.Title,
+			&task.Completed,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		tasks = append(tasks, task)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return tasks, nil
+}
+
+//! Find By Id
+func (r *Repository) FindByID(id int) (*Task, error) {
+	var task Task
+
+	err := r.db.QueryRow(
+		`
+		SELECT id, title, completed
+		FROM tasks
+		WHERE id = ?
+		`,
+		id,
+	).Scan(
+		&task.ID,
+		&task.Title,
+		&task.Completed,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &task, nil
+}
+
+//! Update
+func (r *Repository) Update(
+	id int,
+	title string,
+	completed bool,
+) error {
+	result, err := r.db.Exec(
+		`
+		UPDATE tasks
+		SET title = ?, completed = ?
+		WHERE id = ?
+		`,
+		title,
+		completed,
+		id,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
+}
+
+//! Delete
+func (r *Repository) Delete(id int) error {
+	result, err := r.db.Exec(
+		"DELETE FROM tasks WHERE id = ?",
+		id,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
+}

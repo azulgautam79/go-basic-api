@@ -1,0 +1,57 @@
+
+1. mkdir go-sqlite-tasks
+2. cd go-sqlite-tasks
+
+3. go mod init github.com/azulgautam79/go-sqlite-tasks
+
+4. go get modernc.org/sqlite
+
+5. go run .
+
+go-sqlite-tasks/
+│
+├── api/
+│   └── openapi/
+│
+├── cmd/
+│   └── server/
+│       └── main.go
+│
+├── internal/
+│   ├── database/
+│   │   └── sqlite.go
+│   │
+│   └── task/
+│       ├── model.go
+│       ├── repository.go
+│       ├── service.go
+│       └── handler.go
+│
+├── docs/
+│   └── swagger/
+│
+├── data/
+│   └── tasks.db
+│
+├── go.mod
+├── go.sum
+├── vercel.json
+└── README.md
+
+Generate Swagger docs
+
+swag init
+
+Testing in go
+go test ./...
+go test -v ./task
+
+Race detector
+go test -race ./...
+
+Test coverage
+go test -cover ./...
+
+HTML Test report
+go test ./... -coverprofile=coverage.out
+go tool cover -html=coverage.out
