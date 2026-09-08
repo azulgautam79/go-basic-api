@@ -38,10 +38,7 @@ func main() {
 	}
 
 	go func() {
-		log.Printf(
-			"Server running on http://localhost:%s",
-			cfg.Port,
-		)
+		log.Printf("Server listening on port %s", cfg.Port)
 
 		if err := server.ListenAndServe(); err != nil &&
 			!errors.Is(err, http.ErrServerClosed) {
