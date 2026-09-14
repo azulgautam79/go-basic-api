@@ -1,6 +1,9 @@
 package task
 
-import "testing"
+import (
+	"strconv"
+	"testing"
+)
 
 type fakeRepository struct {
 	tasks []Task
@@ -9,7 +12,7 @@ type fakeRepository struct {
 //! Create Task
 func (f *fakeRepository) Create(title string) (*Task, error) {
 	task := Task{
-		ID:        len(f.tasks) + 1,
+		ID:        strconv.Itoa(len(f.tasks) + 1),
 		Title:     title,
 		Completed: false,
 	}
@@ -148,12 +151,12 @@ func TestServiceGetTasks(t *testing.T) {
 	repository := &fakeRepository{
 		tasks: []Task{
 			{
-				ID:        1,
+				ID:        "1",
 				Title:     "Learn Go",
 				Completed: false,
 			},
 			{
-				ID:        2,
+				ID:        "2",
 				Title:     "Build API",
 				Completed: true,
 			},
@@ -214,9 +217,9 @@ func TestServiceGetTask(t *testing.T) {
 		t.Fatal("expected task, got nil")
 	}
 
-	if task.ID != 1 {
+	if task.ID != "1" {
 		t.Errorf(
-			"expected ID 1, got %d",
+			"expected ID 1, got %s",
 			task.ID,
 		)
 	}
@@ -235,7 +238,7 @@ func TestServiceUpdateTask(t *testing.T) {
 	repository := &fakeRepository{
 		tasks: []Task{
 			{
-				ID:        1,
+				ID:        "1",
 				Title:     "Learn Go",
 				Completed: false,
 			},
@@ -245,7 +248,7 @@ func TestServiceUpdateTask(t *testing.T) {
 	service := NewService(repository)
 
 	err := service.UpdateTask(
-		1,
+		"1",
 		"Learn Go REST API",
 		true,
 	)
@@ -257,7 +260,7 @@ func TestServiceUpdateTask(t *testing.T) {
 		)
 	}
 
-	task, err := service.GetTask(1)
+	task, err := service.GetTask("1")
 
 	if err != nil {
 		t.Fatalf(
@@ -293,7 +296,7 @@ func TestServiceDeleteTask(t *testing.T) {
 
 	service := NewService(repository)
 
-	err := service.DeleteTask(1)
+	err := service.DeleteTask("1")
 
 	if err != nil {
 		t.Fatalf(
