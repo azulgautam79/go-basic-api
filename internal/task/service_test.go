@@ -25,7 +25,7 @@ func (f *fakeRepository) FindAll() ([]Task, error) {
 }
 
 //! Find By id
-func (f *fakeRepository) FindByID(id int) (*Task, error) {
+func (f *fakeRepository) FindByID(id string) (*Task, error) {
 	for _, task := range f.tasks {
 		if task.ID == id {
 			return &task, nil
@@ -37,7 +37,7 @@ func (f *fakeRepository) FindByID(id int) (*Task, error) {
 
 //! Update
 func (f *fakeRepository) Update(
-	id int,
+	id string,
 	title string,
 	completed bool,
 ) error {
@@ -53,7 +53,7 @@ func (f *fakeRepository) Update(
 }
 
 //! Delete
-func (f *fakeRepository) Delete(id int) error {
+func (f *fakeRepository) Delete(id string) error {
 	for i := range f.tasks {
 		if f.tasks[i].ID == id {
 			f.tasks = append(
@@ -192,7 +192,7 @@ func TestServiceGetTask(t *testing.T) {
 	repository := &fakeRepository{
 		tasks: []Task{
 			{
-				ID:        1,
+				ID:        "1",
 				Title:     "Learn Go",
 				Completed: false,
 			},
@@ -201,7 +201,7 @@ func TestServiceGetTask(t *testing.T) {
 
 	service := NewService(repository)
 
-	task, err := service.GetTask(1)
+	task, err := service.GetTask("1")
 
 	if err != nil {
 		t.Fatalf(
@@ -285,7 +285,7 @@ func TestServiceDeleteTask(t *testing.T) {
 	repository := &fakeRepository{
 		tasks: []Task{
 			{
-				ID:    1,
+				ID:    "1",
 				Title: "Learn Go",
 			},
 		},

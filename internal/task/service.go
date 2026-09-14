@@ -7,9 +7,9 @@ type Service struct {
 type ServiceInterface interface {
 	CreateTask(title string) (*Task, error)
 	GetTasks() ([]Task, error)
-	GetTask(id int) (*Task, error)
-	UpdateTask(id int, title string, completed bool) error
-	DeleteTask(id int) error
+	GetTask(id string) (*Task, error)
+	UpdateTask(id string, title string, completed bool) error
+	DeleteTask(id string) error
 }
 
 func NewService(repository RepositoryInterface) *Service {
@@ -27,12 +27,12 @@ func (s *Service) GetTasks() ([]Task, error) {
 	return s.repository.FindAll()
 }
 
-func (s *Service) GetTask(id int) (*Task, error) {
+func (s *Service) GetTask(id string) (*Task, error) {
 	return s.repository.FindByID(id)
 }
 
 func (s *Service) UpdateTask(
-	id int,
+	id string,
 	title string,
 	completed bool,
 ) error {
@@ -43,6 +43,6 @@ func (s *Service) UpdateTask(
 	)
 }
 
-func (s *Service) DeleteTask(id int) error {
+func (s *Service) DeleteTask(id string) error {
 	return s.repository.Delete(id)
 }

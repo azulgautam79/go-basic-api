@@ -42,6 +42,8 @@ Generate Swagger docs
 
 swag init
 
+swag init -g cmd/api/main.go -o docs
+
 Testing in go
 go test ./...
 go test -v ./task

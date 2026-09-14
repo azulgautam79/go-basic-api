@@ -1,4 +1,4 @@
-package configuration
+package config
 
 import (
 	"os"
@@ -9,7 +9,7 @@ import (
 type Config struct {
 	Port  string
 	Env   string
-	DbUrl string
+	DBUrl string
 }
 
 func MustLoad() Config {
@@ -36,6 +36,6 @@ func MustLoad() Config {
 	return Config{
 		Port:  port,
 		Env:   env,
-		DbUrl: dbUrl,
+		DBUrl: dbUrl,
 	}
 }

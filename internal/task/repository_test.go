@@ -54,7 +54,7 @@ func TestRepositoryCreate(t *testing.T) {
 		t.Fatal("expected task, got nil")
 	}
 
-	if task.ID == 0 {
+	if task.ID == "0" {
 		t.Error("expected task ID to be generated")
 	}
 
@@ -175,7 +175,7 @@ func TestRepositoryFindByIDNotFound(t *testing.T) {
 
 	repository := NewRepository(db)
 
-	task, err := repository.FindByID(999)
+	task, err := repository.FindByID("999")
 
 	if task != nil {
 		t.Error("expected nil task")
@@ -246,7 +246,7 @@ func TestRepositoryUpdateNotFound(t *testing.T) {
 	repository := NewRepository(db)
 
 	err := repository.Update(
-		999,
+		"999",
 		"Does not exist",
 		true,
 	)
@@ -299,7 +299,7 @@ func TestRepositoryDeleteNotFound(t *testing.T) {
 
 	repository := NewRepository(db)
 
-	err := repository.Delete(999)
+	err := repository.Delete("999")
 
 	if err != sql.ErrNoRows {
 		t.Errorf(

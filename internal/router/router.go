@@ -3,27 +3,37 @@ package router
 import (
 	"net/http"
 
-	"github.com/azulgautam79/go-sqlite-tasks/scalar"
-	"github.com/azulgautam79/go-sqlite-tasks/task"
+	"github.com/azulgautam79/go-sqlite-tasks/internal/scalar"
+	"github.com/azulgautam79/go-sqlite-tasks/internal/task"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
+type Router struct {
+	taskHandler *task.Handler
+}
+
 func New(taskHandler *task.Handler) http.Handler {
+
+	r := &Router{
+		taskHandler: taskHandler,
+	}
+
+	return r.routes()
+}
+
+func (r *Router) routes() http.Handler {
 	mux := http.NewServeMux()
 
-	//! Tasks
-	mux.HandleFunc("GET /api/tasks", taskHandler.GetTasks)
-	mux.HandleFunc("POST /api/tasks", taskHandler.CreateTask)
-	mux.HandleFunc("GET /api/tasks/{id}", taskHandler.GetTask)
-	mux.HandleFunc("PUT /api/tasks/{id}", taskHandler.UpdateTask)
-	mux.HandleFunc("DELETE /api/tasks/{id}", taskHandler.DeleteTask)
+	r.registerTaskRoutes(mux)
 
-	//* Swagger
+	// Serve static files
+	static := http.FileServer(http.Dir("./static"))
+	mux.Handle("/static/", http.StripPrefix("/static/", static))
 	mux.Handle("/swagger/", httpSwagger.WrapHandler)
-	mux.HandleFunc("GET /openapi.json", openAPISpec)
 
-	//? Scalar
+	mux.HandleFunc("GET /openapi.json", openAPISpec)
 	mux.HandleFunc("GET /docs", scalar.Handler)
+
 	return mux
 }
 

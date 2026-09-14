@@ -5,9 +5,9 @@ import "database/sql"
 type RepositoryInterface interface {
 	Create(title string) (*Task, error)
 	FindAll() ([]Task, error)
-	FindByID(id int) (*Task, error)
-	Update(id int, title string, completed bool) error
-	Delete(id int) error
+	FindByID(id string) (*Task, error)
+	Update(id string, title string, completed bool) error
+	Delete(id string) error
 }
 
 type Repository struct {
@@ -22,31 +22,31 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-//! Create Task
+// ! Create Task
 func (r *Repository) Create(title string) (*Task, error) {
-	result, err := r.db.Exec(
-		"INSERT INTO tasks(title, completed) VALUES (?, ?)",
+	var task Task
+
+	err := r.db.QueryRow(
+		`
+		INSERT INTO tasks(title, completed)
+		VALUES ($1, $2)
+		RETURNING id, title, completed
+		`,
 		title,
 		false,
+	).Scan(
+		&task.ID,
+		&task.Title,
+		&task.Completed,
 	)
 
 	if err != nil {
 		return nil, err
 	}
-
-	id, err := result.LastInsertId()
-	if err != nil {
-		return nil, err
-	}
-
-	return &Task{
-		ID:        int(id),
-		Title:     title,
-		Completed: false,
-	}, nil
+	return &task, nil
 }
 
-//! Find All
+// ! Find All
 func (r *Repository) FindAll() ([]Task, error) {
 	rows, err := r.db.Query(`
 	SELECT id, title, completed
@@ -84,15 +84,15 @@ func (r *Repository) FindAll() ([]Task, error) {
 	return tasks, nil
 }
 
-//! Find By Id
-func (r *Repository) FindByID(id int) (*Task, error) {
+// ! Find By Id
+func (r *Repository) FindByID(id string) (*Task, error) {
 	var task Task
 
 	err := r.db.QueryRow(
 		`
 		SELECT id, title, completed
 		FROM tasks
-		WHERE id = ?
+		WHERE id = $1
 		`,
 		id,
 	).Scan(
@@ -108,17 +108,17 @@ func (r *Repository) FindByID(id int) (*Task, error) {
 	return &task, nil
 }
 
-//! Update
+// ! Update
 func (r *Repository) Update(
-	id int,
+	id string,
 	title string,
 	completed bool,
 ) error {
 	result, err := r.db.Exec(
 		`
 		UPDATE tasks
-		SET title = ?, completed = ?
-		WHERE id = ?
+		SET title = $1, completed = $2
+		WHERE id = $3
 		`,
 		title,
 		completed,
@@ -141,10 +141,10 @@ func (r *Repository) Update(
 	return nil
 }
 
-//! Delete
-func (r *Repository) Delete(id int) error {
+// ! Delete
+func (r *Repository) Delete(id string) error {
 	result, err := r.db.Exec(
-		"DELETE FROM tasks WHERE id = ?",
+		"DELETE FROM tasks WHERE id = $1",
 		id,
 	)
 

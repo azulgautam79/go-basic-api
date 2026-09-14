@@ -4,8 +4,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
-	"strconv"
-	"strings"
+	// "strconv"
+
+	"github.com/google/uuid"
 )
 
 type Handler struct {
@@ -23,15 +24,26 @@ func writeJSON(
 	json.NewEncoder(w).Encode(data)
 }
 
-func getTaskID(r *http.Request) (int, error) {
-	parts := strings.Split(
-		strings.Trim(r.URL.Path, "/"),
-		"/",
-	)
+// func getTaskID(r *http.Request) (string, error) {
+// 	parts := strings.Split(
+// 		strings.Trim(r.URL.Path, "/"),
+// 		"/",
+// 	)
 
-	idString := parts[len(parts)-1]
+// 	idString := parts[len(parts)-1]
 
-	return strconv.Atoi(idString)
+// 	return strconv.Atoi(idString)
+
+// 	return strconv.Atoi(r.PathValue("id"))
+// }
+
+func getTaskID(r *http.Request) (string, error) {
+	id := r.PathValue("id")
+	_, err := uuid.Parse(id)
+	if err != nil {
+		return "", err
+	}
+	return id, nil
 }
 
 func NewHandler(service ServiceInterface) *Handler {
@@ -40,7 +52,7 @@ func NewHandler(service ServiceInterface) *Handler {
 	}
 }
 
-// ! Get    /api/tasks
+// ! Get    /api/v1/tasks
 // GetTasks godoc
 // @Summary Get all tasks
 // @Description Get all tasks
@@ -48,7 +60,7 @@ func NewHandler(service ServiceInterface) *Handler {
 // @Produce json
 // @Success 200 {array} Task
 // @Failure 500 {object} map[string]string
-// @Router /api/tasks [get]
+// @Router /api/v1/tasks [get]
 func (h *Handler) GetTasks(
 	w http.ResponseWriter,
 	r *http.Request,
@@ -65,7 +77,7 @@ func (h *Handler) GetTasks(
 	writeJSON(w, http.StatusOK, tasks)
 }
 
-// ! Post    /api/task
+// ! Post    /api/v1/task
 // CreateTask godoc
 // @Summary Create a task
 // @Description Create a new task
@@ -76,7 +88,7 @@ func (h *Handler) GetTasks(
 // @Success 201 {object} Task
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /api/tasks [post]
+// @Router /api/v1/tasks [post]
 func (h *Handler) CreateTask(
 	w http.ResponseWriter,
 	r *http.Request,
@@ -100,10 +112,9 @@ func (h *Handler) CreateTask(
 	}
 
 	task, err := h.service.CreateTask(request.Title)
-
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]string{
-			"error": "failed to create task",
+			"error": err.Error(),
 		})
 		return
 	}
@@ -115,18 +126,18 @@ func (h *Handler) CreateTask(
 	)
 }
 
-// ! Get by Id	/api/task/${id}
+// ! Get by Id	/api/v1/task/${id}
 // GetTask godoc
 // @Summary Get a task
 // @Description Get a task by ID
 // @Tags tasks
 // @Produce json
-// @Param id path int true "Task ID"
+// @Param id path string true "Task ID"
 // @Success 200 {object} Task
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /api/tasks/{id} [get]
+// @Router /api/v1/tasks/{id} [get]
 func (h *Handler) GetTask(
 	w http.ResponseWriter,
 	r *http.Request,
@@ -159,7 +170,7 @@ func (h *Handler) GetTask(
 	writeJSON(w, http.StatusOK, task)
 }
 
-// ! Put    /api/task/${id}
+// ! Put    /api/v1/task/${id}
 // UpdateTask godoc
 // @Summary Update a task
 // @Description Update a task by ID
@@ -172,7 +183,7 @@ func (h *Handler) GetTask(
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /api/tasks/{id} [put]
+// @Router /api/v1/tasks/{id} [put]
 func (h *Handler) UpdateTask(
 	w http.ResponseWriter,
 	r *http.Request,
@@ -236,7 +247,7 @@ func (h *Handler) UpdateTask(
 	writeJSON(w, http.StatusOK, task)
 }
 
-// ! Delete    /api/task/${id}
+// ! Delete    /api/v1/ask/${id}
 // DeleteTask godoc
 // @Summary Delete a task
 // @Description Delete a task by ID
@@ -246,7 +257,7 @@ func (h *Handler) UpdateTask(
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /api/tasks/{id} [delete]
+// @Router /api/v1/asks/{id} [delete]
 func (h *Handler) DeleteTask(
 	w http.ResponseWriter,
 	r *http.Request,
