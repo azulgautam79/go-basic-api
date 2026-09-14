@@ -1,18 +1,10 @@
-# SQLite
-*.db
-tasks.db
-
-bin
-
 # Environment
 .env
 .env.*
 !.env.example
 
-# Vercel
-.vercel
-
 # Go
+bin
 *.exe
 *.test
 *.out
