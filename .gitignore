@@ -2,6 +2,8 @@
 *.db
 tasks.db
 
+bin
+
 # Environment
 .env
 .env.*
