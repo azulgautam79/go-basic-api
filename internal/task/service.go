@@ -18,6 +18,7 @@ func NewService(repository RepositoryInterface) *Service {
 	}
 }
 
+//! Create Task 
 func (s *Service) CreateTask(title string) (*Task, error) {
 	return s.repository.Create(title)
 }

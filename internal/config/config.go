@@ -2,33 +2,40 @@ package configuration
 
 import (
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	Port         string
-	DatabasePath string
-	Environment  string
+	Port  string
+	Env   string
+	DbUrl string
 }
 
-func Load() Config {
+func MustLoad() Config {
+	godotenv.Load()
+
+	//! Port
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		panic("PORT is required")
 	}
 
-	databasePath := os.Getenv("DATABASE_PATH")
-	if databasePath == "" {
-		databasePath = "tasks.db"
+	//! Env
+	env := os.Getenv("ENV")
+	if env == "" {
+		panic("ENV is required")
 	}
 
-	environment := os.Getenv("ENV")
-	if environment == "" {
-		environment = "development"
+	//! DbUrl
+	dbUrl := os.Getenv("DATABASE_URL")
+	if dbUrl == "" {
+		panic("DATABASE_URL is required")
 	}
 
 	return Config{
-		Port:         port,
-		DatabasePath: databasePath,
-		Environment:  environment,
+		Port:  port,
+		Env:   env,
+		DbUrl: dbUrl,
 	}
 }
