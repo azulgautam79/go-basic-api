@@ -24,6 +24,9 @@ func New(taskHandler *task.Handler) http.Handler {
 func (r *Router) routes() http.Handler {
 	mux := http.NewServeMux()
 
+	//! Health
+	mux.HandleFunc("GET /healthz", Healthz)
+
 	r.registerTaskRoutes(mux)
 
 	// Serve static files
