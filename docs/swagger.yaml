@@ -1,4 +1,121 @@
 definitions:
+  employees.BatchDeleteDTO:
+    properties:
+      ids:
+        example:
+        - '["550e8400-e29b-41d4-a716-446655440000"'
+        - '"a1b2c3d4-e5f6-7890-abcd-ef1234567890"]'
+        items:
+          type: string
+        type: array
+    type: object
+  employees.CreateEmployeeDTO:
+    properties:
+      email:
+        example: john.doe@example.com
+        type: string
+      first_name:
+        example: John
+        type: string
+      gender:
+        allOf:
+        - $ref: '#/definitions/employees.Gender'
+        enum:
+        - male
+        - female
+        - other
+        - prefer_not_to_say
+        example: male
+      is_active:
+        example: true
+        type: boolean
+      last_name:
+        example: Doe
+        type: string
+    type: object
+  employees.Employee:
+    properties:
+      created_at:
+        example: "2026-01-15T10:00:00Z"
+        type: string
+      deleted_at:
+        example: "null"
+        type: string
+      email:
+        example: john.doe@example.com
+        type: string
+      first_name:
+        example: John
+        type: string
+      gender:
+        allOf:
+        - $ref: '#/definitions/employees.Gender'
+        example: male
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      is_active:
+        example: true
+        type: boolean
+      last_name:
+        example: Doe
+        type: string
+      updated_at:
+        example: "2026-01-15T10:00:00Z"
+        type: string
+    type: object
+  employees.Gender:
+    enum:
+    - male
+    - female
+    - other
+    - prefer_not_to_say
+    type: string
+    x-enum-varnames:
+    - GenderMale
+    - GenderFemale
+    - GenderOther
+    - GenderPreferNotToSay
+  employees.PaginatedResponse:
+    properties:
+      data: {}
+      limit:
+        example: 10
+        type: integer
+      page:
+        example: 1
+        type: integer
+      total:
+        example: 42
+        type: integer
+      total_pages:
+        example: 5
+        type: integer
+    type: object
+  employees.UpdateEmployeeDTO:
+    properties:
+      email:
+        example: jane.smith@example.com
+        type: string
+      first_name:
+        example: Jane
+        type: string
+      gender:
+        allOf:
+        - $ref: '#/definitions/employees.Gender'
+        enum:
+        - male
+        - female
+        - other
+        - prefer_not_to_say
+        example: female
+      is_active:
+        example: false
+        type: boolean
+      last_name:
+        example: Smith
+        type: string
+    type: object
   task.CreateTaskRequest:
     properties:
       title:
@@ -29,18 +146,133 @@ definitions:
 info:
   contact: {}
 paths:
-  /api/v1/asks/{id}:
-    delete:
-      description: Delete a task by ID
+  /api/v1/employees:
+    get:
+      description: Retrieves employees with support for search, gender/active filters,
+        and pagination
       parameters:
-      - description: Task ID
+      - description: Page number (default 1)
+        in: query
+        name: page
+        type: integer
+      - description: Page size limit (default 10)
+        in: query
+        name: limit
+        type: integer
+      - description: Search term for name or email
+        in: query
+        name: search
+        type: string
+      - description: Filter by gender
+        enum:
+        - male
+        - female
+        - other
+        - prefer_not_to_say
+        in: query
+        name: gender
+        type: string
+      - description: Filter by active status
+        in: query
+        name: is_active
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/employees.PaginatedResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get filtered and paginated employees
+      tags:
+      - employees
+    post:
+      consumes:
+      - application/json
+      description: Creates an employee record in the system
+      parameters:
+      - description: Create Employee Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/employees.CreateEmployeeDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/employees.Employee'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new employee
+      tags:
+      - employees
+  /api/v1/employees/{id}:
+    delete:
+      description: Performs a soft delete on an employee record by setting deleted_at
+      parameters:
+      - description: Employee UUID
         in: path
         name: id
         required: true
-        type: integer
+        type: string
+      produces:
+      - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Soft delete an employee
+      tags:
+      - employees
+    get:
+      description: Fetches details of a single employee by their UUID
+      parameters:
+      - description: Employee UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/employees.Employee'
         "400":
           description: Bad Request
           schema:
@@ -59,9 +291,179 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Delete a task
+      summary: Get employee by ID
       tags:
-      - tasks
+      - employees
+    put:
+      consumes:
+      - application/json
+      description: Updates select fields of an employee by UUID
+      parameters:
+      - description: Employee UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/employees.UpdateEmployeeDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/employees.Employee'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update employee details
+      tags:
+      - employees
+  /api/v1/employees/{id}/inactive:
+    patch:
+      description: Sets an employee's is_active field to false
+      parameters:
+      - description: Employee UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Inactivate an employee
+      tags:
+      - employees
+  /api/v1/employees/all:
+    get:
+      description: Fetches a list of all active employees without pagination
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/employees.Employee'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all employees (Unpaginated)
+      tags:
+      - employees
+  /api/v1/employees/batch-delete:
+    post:
+      consumes:
+      - application/json
+      description: Soft deletes multiple employee records in a single request
+      parameters:
+      - description: Batch Delete Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/employees.BatchDeleteDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Batch soft delete employees
+      tags:
+      - employees
+  /api/v1/employees/inactive-many:
+    patch:
+      consumes:
+      - application/json
+      description: Sets is_active field to false for a list of UUIDs
+      parameters:
+      - description: Batch Inactivate Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/employees.BatchDeleteDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Inactivate multiple employees
+      tags:
+      - employees
   /api/v1/tasks:
     get:
       description: Get all tasks
@@ -117,6 +519,38 @@ paths:
       tags:
       - tasks
   /api/v1/tasks/{id}:
+    delete:
+      description: Delete a task by ID
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a task
+      tags:
+      - tasks
     get:
       description: Get a task by ID
       parameters:
@@ -197,4 +631,19 @@ paths:
       summary: Update a task
       tags:
       - tasks
+  /healthz:
+    get:
+      description: Returns the health status of the service.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Service is healthy
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health check
+      tags:
+      - Health
 swagger: "2.0"

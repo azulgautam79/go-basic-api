@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
+
 	// "strconv"
 
 	"github.com/google/uuid"
@@ -77,7 +78,7 @@ func (h *Handler) GetTasks(
 	writeJSON(w, http.StatusOK, tasks)
 }
 
-// ! Post    /api/v1/task
+// ! Post    /api/v1/tasks
 // CreateTask godoc
 // @Summary Create a task
 // @Description Create a new task
@@ -126,7 +127,7 @@ func (h *Handler) CreateTask(
 	)
 }
 
-// ! Get by Id	/api/v1/task/${id}
+// ! Get by Id	/api/v1/tasks/${id}
 // GetTask godoc
 // @Summary Get a task
 // @Description Get a task by ID
@@ -170,7 +171,7 @@ func (h *Handler) GetTask(
 	writeJSON(w, http.StatusOK, task)
 }
 
-// ! Put    /api/v1/task/${id}
+// ! Put    /api/v1/tasks/${id}
 // UpdateTask godoc
 // @Summary Update a task
 // @Description Update a task by ID
@@ -247,7 +248,7 @@ func (h *Handler) UpdateTask(
 	writeJSON(w, http.StatusOK, task)
 }
 
-// ! Delete    /api/v1/ask/${id}
+// ! Delete    /api/v1/tasks/${id}
 // DeleteTask godoc
 // @Summary Delete a task
 // @Description Delete a task by ID
@@ -257,7 +258,7 @@ func (h *Handler) UpdateTask(
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /api/v1/asks/{id} [delete]
+// @Router /api/v1/tasks/{id} [delete]
 func (h *Handler) DeleteTask(
 	w http.ResponseWriter,
 	r *http.Request,

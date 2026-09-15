@@ -2,6 +2,13 @@ package router
 
 import "net/http"
 
+// Healthz godoc
+// @Summary      Health check
+// @Description  Returns the health status of the service.
+// @Tags         Health
+// @Produce      json
+// @Success      200  {object}  map[string]string  "Service is healthy"
+// @Router       /healthz [get]
 func Healthz(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

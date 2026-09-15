@@ -150,7 +150,7 @@ func TestRepositoryFindByID(t *testing.T) {
 
 	if task.ID != createdTask.ID {
 		t.Errorf(
-			"expected ID %d, got %d",
+			"expected ID %s, got %s",
 			createdTask.ID,
 			task.ID,
 		)

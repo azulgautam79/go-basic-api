@@ -13,6 +13,7 @@ import (
 
 	"github.com/azulgautam79/go-sqlite-tasks/internal/config"
 	"github.com/azulgautam79/go-sqlite-tasks/internal/db"
+	"github.com/azulgautam79/go-sqlite-tasks/internal/employees"
 	"github.com/azulgautam79/go-sqlite-tasks/internal/router"
 	"github.com/azulgautam79/go-sqlite-tasks/internal/task"
 )
@@ -41,9 +42,14 @@ func main() {
 	taskRepository := task.NewRepository(db)
 	taskService := task.NewService(taskRepository)
 	taskHandler := task.NewHandler(taskService)
+	//* Employees
+	employeeRepository := employees.NewRepository(db)
+	employeeService := employees.NewService(employeeRepository)
+	employeeHandler := employees.NewHandler(employeeService)
 
 	handler := router.New(
 		taskHandler,
+		employeeHandler,
 	)
 
 	//! Server
